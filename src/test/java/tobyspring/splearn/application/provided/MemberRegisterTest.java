@@ -5,19 +5,17 @@ import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import tobyspring.splearn.SplearnTestConfiguration;
 import tobyspring.splearn.domain.*;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
 @Import(SplearnTestConfiguration.class)
-public record MemberRegisterTest (MemberRegister memberRegister, EntityManager entityManager) {
+record MemberRegisterTest (MemberRegister memberRegister, EntityManager entityManager) {
 
     @Test
     void register() {
@@ -29,7 +27,7 @@ public record MemberRegisterTest (MemberRegister memberRegister, EntityManager e
 
     @Test
     void duplicateEmailFail() {
-        Member member = memberRegister.register(MemberFixture.createMemberRegisterRequest());
+        memberRegister.register(MemberFixture.createMemberRegisterRequest());
 
         assertThatThrownBy(() -> memberRegister.register(MemberFixture.createMemberRegisterRequest()))
             .isInstanceOf(DuplicateEmailException.class);
@@ -49,12 +47,12 @@ public record MemberRegisterTest (MemberRegister memberRegister, EntityManager e
 
     @Test
     void memberRegisterRequestFail() {
-        extracted(new MemberRegisterRequest("toby@splearn.app", "Toby", "longsecret"));
-        extracted(new MemberRegisterRequest("toby@splearn.app", "Charlie______________________________", "longsecret"));
-        extracted(new MemberRegisterRequest("tobysplearn.app", "Charlie______________________________", "longsecret"));
+        checkValidation(new MemberRegisterRequest("toby@splearn.app", "Toby", "longsecret"));
+        checkValidation(new MemberRegisterRequest("toby@splearn.app", "Charlie______________________________", "longsecret"));
+        checkValidation(new MemberRegisterRequest("tobysplearn.app", "Charlie______________________________", "longsecret"));
     }
 
-    private void extracted(MemberRegisterRequest invalid) {
+    private void checkValidation(MemberRegisterRequest invalid) {
         assertThatThrownBy(() -> memberRegister.register(invalid))
             .isInstanceOf(ConstraintViolationException.class);
     }
